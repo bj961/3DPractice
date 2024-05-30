@@ -1,0 +1,144 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+
+public class PlayerController : MonoBehaviour
+{
+    [Header("Movement")]
+    public float moveSpeed;
+    public float jumpPower;
+    private Vector2 curMovementInput;
+    public LayerMask groundLayerMask;
+
+    [Header("Look")]
+    public Transform cameraContainer;
+    public float minXLook;
+    public float maxXLook;
+    private float camCurXRot;
+    public float lookSensivity;
+    private Vector2 mouseDelta;
+    public bool canLook = true; //인벤토리 켰을 때 화면 움직이지 않고 커서 나오게 하기 위함
+
+    public Action inventory;
+    private Rigidbody _rigidbody;
+    public Animator animator;
+
+    private void Awake()
+    {
+        cameraContainer = transform.Find("CameraContainer").GetComponent<Transform>();
+        _rigidbody = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
+    }
+
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
+
+
+    void FixedUpdate()
+    {
+        Move();
+    }
+
+    private void LateUpdate()
+    {
+        if (canLook)
+        {
+            CameraLook();
+        }
+    }
+
+    private void Move()
+    {
+        Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
+        dir *= moveSpeed;
+        dir.y = _rigidbody.velocity.y; // 점프 등 위아래로 움직일 경우 그 값 유지시켜주기 위함
+
+        _rigidbody.velocity = dir;
+    }
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed) //Started는 키 눌린 순간에만 작동
+        {
+            curMovementInput = context.ReadValue<Vector2>();
+            animator.SetBool("Moving", true);
+            //animator.SetFloat("xAxis", curMovementInput.x);
+            animator.SetFloat("zAxis", curMovementInput.y);
+        }
+        else if (context.phase == InputActionPhase.Canceled)
+        {
+            curMovementInput = Vector2.zero;
+            animator.SetBool("Moving", false);
+            //animator.SetFloat("xAxis", curMovementInput.x);
+            animator.SetFloat("zAxis", curMovementInput.y);
+        }
+
+    }
+
+    void CameraLook()
+    {
+        //마우스 좌우로 움직이면 마우스델타의 x가 변경됨?? 캐릭터가 좌우로 움직이려면 축을 y축을 돌려야 함
+        // 그래서 실제로 받는값, 마우스델타x는 y에 넣어주고 y는 x에 넣어줘야 원하는 결과를 낼 수 있음
+        // -> 마우드델타x값에 마우스 민감도 곱해서 y축에 넣어줌
+        camCurXRot += mouseDelta.y * lookSensivity;
+        camCurXRot = Mathf.Clamp(camCurXRot, minXLook, maxXLook); // Clamp() : 최소값보다 작아지면 최대값 반환, 최대값보다 커지면 최소값 반환
+        cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0); // - 붙여준 이유 : 마우스 이동과 회전이 반대라서 그럼 (실제 로테이션 값 바꿔봐라)
+
+        transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensivity, 0);
+    }
+
+    public void OnLook(InputAction.CallbackContext context)
+    {
+        mouseDelta = context.ReadValue<Vector2>();
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started && IsGrounded())
+        {
+            _rigidbody.AddForce(Vector2.up * jumpPower, ForceMode.Impulse);
+        }
+    }
+
+    bool IsGrounded()
+    {
+        Ray[] rays = new Ray[4]
+        {
+            new Ray(transform.position + (transform.forward * 0.2f) + (transform.up*0.01f), Vector3.down),
+            new Ray(transform.position + (transform.forward * 0.2f) + (transform.up*0.01f), Vector3.down),
+            new Ray(transform.position + (transform.forward * 0.2f) + (transform.up * 0.01f), Vector3.down),
+            new Ray(transform.position + (transform.forward * 0.2f) + (transform.up * 0.01f), Vector3.down)
+        };
+
+        for (int i = 0; i < rays.Length; i++)
+        {
+            if (Physics.Raycast(rays[i], 0.1f, groundLayerMask))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void OnInventory(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            inventory?.Invoke();
+            ToggleCursor();
+        }
+    }
+
+    void ToggleCursor()
+    {
+        bool toggle = Cursor.lockState == CursorLockMode.Locked;
+        Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
+        canLook = !toggle;
+    }
+}
