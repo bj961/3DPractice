@@ -25,7 +25,7 @@ public class JumpingObject : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Ãæµ¹");
+            Debug.Log("Jumpimg Object Collision");
             collision.gameObject.GetComponent<Rigidbody>().AddForce(direction * power, ForceMode.Impulse);
         }
     }
