@@ -2493,6 +2493,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: _Environments
       objectReference: {fileID: 0}
+    - target: {fileID: 7253014379399885620, guid: 302f9270c40ea514c921b423eea7347c, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9606,9 +9610,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   jumpPower: 80
+  dashPower: 200
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 55
+  jumpStamina: 0
+  dashStamina: 20
   cameraContainer: {fileID: 1475958116}
   minXLook: -85
   maxXLook: 85
@@ -9753,6 +9760,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: f90151ac-e570-45d7-9d64-b817907d02ba
     m_ActionName: Player/Interaction[/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6943709226008784330}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: OnDash
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e25dbcf8-6491-48ab-a569-409ff0420146
+    m_ActionName: Player/Dash[/Keyboard/leftShift]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player

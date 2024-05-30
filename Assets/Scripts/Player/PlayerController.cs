@@ -3,15 +3,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using static UnityEditor.Timeline.TimelinePlaybackControls;
 
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed;
-    public float jumpPower;
+    public float jumpPower = 80f;
+    public float dashPower = 200f;
     private Vector2 curMovementInput;
     public LayerMask groundLayerMask;
+    public float jumpStamina;
+    public float dashStamina = 20f;
 
     [Header("Look")]
     public Transform cameraContainer;
@@ -52,12 +56,20 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void GetDirection(out Vector3 dir)
+    {
+        dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
+        dir *= moveSpeed;
+        dir.y = _rigidbody.velocity.y;
+    }
+
     private void Move()
     {
-        Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
-        dir *= moveSpeed;
-        dir.y = _rigidbody.velocity.y; // 점프 등 위아래로 움직일 경우 그 값 유지시켜주기 위함
-
+        //Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
+        //dir *= moveSpeed;
+        //dir.y = _rigidbody.velocity.y; // 점프 등 위아래로 움직일 경우 그 값 유지시켜주기 위함
+        Vector3 dir;
+        GetDirection(out dir);
         _rigidbody.velocity = dir;
     }
 
@@ -104,6 +116,20 @@ public class PlayerController : MonoBehaviour
             _rigidbody.AddForce(Vector2.up * jumpPower, ForceMode.Impulse);
         }
     }
+
+    public void OnDash(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            Debug.Log("Dash");
+
+            Vector3 dir;
+            GetDirection(out dir);
+            CharacterManager.Instance.Player.condition.UseStamina(jumpStamina);
+            _rigidbody.AddForce(dir.normalized * dashPower, ForceMode.Impulse);
+        }
+    }
+
 
     bool IsGrounded()
     {
