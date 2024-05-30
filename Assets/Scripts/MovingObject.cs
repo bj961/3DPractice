@@ -15,7 +15,7 @@ public class MovingObject : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
 
-        direction = Vector3.forward;
+        direction = transform.forward;//Vector3.forward;
         speed = 5f;
         time = 0;
         directionChangeTime = 1.5f;
