@@ -15,10 +15,15 @@ public class MovingObject : MonoBehaviour
     {
         _rigidbody = GetComponent<Rigidbody>();
 
-        //direction = Vector3.forward;
+        direction = Vector3.forward;
         speed = 5f;
         time = 0;
-        directionChangeTime = 3f;
+        directionChangeTime = 1.5f;
+    }
+
+    void Movement(Transform targetTransform)
+    {
+        targetTransform.position = targetTransform.position + direction * speed * Time.deltaTime;
     }
 
     void FixedUpdate()
@@ -29,12 +34,11 @@ public class MovingObject : MonoBehaviour
             direction = -direction;
         }
         time += Time.deltaTime;
-        _rigidbody.MovePosition(transform.position + direction * speed * Time.deltaTime);
-        //transform.position = transform.position + direction * speed * Time.deltaTime;
+        Movement(transform);
     }
 
     private void OnCollisionStay(Collision collision)
     {
-        //collision.gameObject.GetComponent<Rigidbody>().velocity += transform.GetComponent<Rigidbody>().velocity;
+        Movement(collision.gameObject.transform);
     }
 }
