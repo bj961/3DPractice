@@ -9,15 +9,17 @@ using static UnityEditor.Timeline.TimelinePlaybackControls;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
+    public float defaultMoveSpeed;
     public float moveSpeed;
     public float jumpPower = 80f;
-    public float dashPower = 200f;
+    public float dashSpeed = 10f;
     private Vector2 curMovementInput;
     public LayerMask groundLayerMask;
     public float jumpStamina;
-    public float dashStamina = 20f;
+    public float dashStamina = 10f;
 
     [Header("Look")]
+
     public Transform cameraContainer;
     public float minXLook;
     public float maxXLook;
@@ -40,6 +42,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        moveSpeed = defaultMoveSpeed;
     }
 
 
@@ -65,9 +68,6 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        //Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
-        //dir *= moveSpeed;
-        //dir.y = _rigidbody.velocity.y; // 점프 등 위아래로 움직일 경우 그 값 유지시켜주기 위함
         Vector3 dir;
         GetDirection(out dir);
         _rigidbody.velocity = dir;
@@ -119,14 +119,17 @@ public class PlayerController : MonoBehaviour
 
     public void OnDash(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Started)
+        if (context.phase == InputActionPhase.Performed && CharacterManager.Instance.Player.condition.UseStamina(dashStamina))
         {
             Debug.Log("Dash");
+            animator.SetBool("isRunning", true);
+            moveSpeed += dashSpeed;
+        }
 
-            Vector3 dir;
-            GetDirection(out dir);
-            CharacterManager.Instance.Player.condition.UseStamina(jumpStamina);
-            _rigidbody.AddForce(dir.normalized * dashPower, ForceMode.Impulse);
+        if (context.phase == InputActionPhase.Canceled)
+        {
+            animator.SetBool("isRunning", false);
+            moveSpeed = defaultMoveSpeed;
         }
     }
 
@@ -143,7 +146,7 @@ public class PlayerController : MonoBehaviour
 
         for (int i = 0; i < rays.Length; i++)
         {
-            if (Physics.Raycast(rays[i], 0.1f, groundLayerMask))
+            if (Physics.Raycast(rays[i], 0.5f, groundLayerMask))
             {
                 return true;
             }
