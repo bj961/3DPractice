@@ -17,7 +17,7 @@ public class PlayerCameraController : MonoBehaviour
 
     Vector3 cameraPosition;
     Vector3 FPSView = new Vector3(0, -1.75f, -0.135f);
-    Vector3 TPSView = new Vector3(0, -3f, 5f);
+    Vector3 TPSView = new Vector3(0, -2f, 10f);
 
     [SerializeField] private float cameraTurnSpeed = 15f;
     private float mouseX;

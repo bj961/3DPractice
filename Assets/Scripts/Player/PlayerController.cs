@@ -14,12 +14,13 @@ public class PlayerController : MonoBehaviour
     public float jumpPower = 80f;
     public float dashSpeed = 10f;
     private Vector2 curMovementInput;
+    [SerializeField] private Vector3 beforeDirection;
     public LayerMask groundLayerMask;
     public float jumpStamina;
     public float dashStamina = 10f;
+    
 
     [Header("Look")]
-
     public Transform cameraContainer;
     public float minXLook;
     public float maxXLook;
@@ -31,6 +32,39 @@ public class PlayerController : MonoBehaviour
     public Action inventory;
     private Rigidbody _rigidbody;
     public Animator animator;
+
+    bool isJumping = false;
+
+    private Coroutine coroutine;
+
+    public void JumpingObjectCollisionToggle()
+    {
+        isJumping = !isJumping;
+        //Invoke("JumpingObjectCollisionToggle1", 3f);
+        //코루틴으로 땅에 부딫혔을 때 다시 토글하도록..?
+        GroundedToggle();
+    }
+
+
+    public void GroundedToggle()
+    {
+        if (coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
+        coroutine = StartCoroutine(JumpingObjectCollisionToggle1());
+    }
+
+    private IEnumerator JumpingObjectCollisionToggle1()
+    {
+        while (!IsGrounded())
+        {
+            isJumping = !isJumping;
+            yield return null;
+        }
+    }
+
+
 
     private void Awake()
     {
@@ -48,7 +82,12 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        Move();
+        //if 점프 아닐때만 { Move() }
+        if(isJumping == false)
+        {
+            Move();
+        }
+        
     }
 
     private void LateUpdate()
@@ -59,18 +98,33 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void GetDirection(out Vector3 dir)
-    {
-        dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
-        dir *= moveSpeed;
-        dir.y = _rigidbody.velocity.y;
-    }
+
 
     private void Move()
     {
-        Vector3 dir;
-        GetDirection(out dir);
-        _rigidbody.velocity = dir;
+        Vector3 direction;
+
+        // 이 부분을 수정해야 함.
+        // 점프 시 떨어지는 시간을 계산하여 점프 중에는 move를 동작 안하게 하는게 가장 간단한 방법.
+        direction = transform.forward * curMovementInput.y + transform.right * curMovementInput.x; // 입력이 없을 때 이 부분이 0
+        direction *= moveSpeed;
+        direction.y = _rigidbody.velocity.y;
+
+        //_rigidbody.velocity = direction;
+
+        if (direction != Vector3.zero)
+        {
+            _rigidbody.velocity = direction;
+            beforeDirection = direction;
+        }
+        else
+        {
+            if (direction != beforeDirection)
+            {
+                _rigidbody.velocity = direction;
+                beforeDirection = direction;
+            }
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -89,7 +143,6 @@ public class PlayerController : MonoBehaviour
             //animator.SetFloat("xAxis", curMovementInput.x);
             animator.SetFloat("zAxis", curMovementInput.y);
         }
-
     }
 
     void CameraLook()
