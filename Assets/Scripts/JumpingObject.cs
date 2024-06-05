@@ -20,12 +20,15 @@ public class JumpingObject : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player")) // 개인과제해설영상 리지드바디 있으면.. 그 조건으로 변경
-        {
-            Debug.Log("Jumpimg Object Collision");
-            CharacterManager.Instance.Player.controller.JumpingObjectCollisionToggle();
-            collision.gameObject.GetComponent<Rigidbody>().AddForce(direction * power, ForceMode.Impulse);
-        }
+        collision.gameObject.GetComponent<Rigidbody>().AddForce(direction * power, ForceMode.Impulse);
+
+
+        //if (collision.gameObject.CompareTag("Player")) // 개인과제해설영상 리지드바디 있으면.. 그 조건으로 변경
+        //{
+        //    Debug.Log("Jumpimg Object Collision");
+        //    CharacterManager.Instance.Player.controller.JumpingObjectCollisionToggle();
+        //    collision.gameObject.GetComponent<Rigidbody>().AddForce(direction * power, ForceMode.Impulse);
+        //}
     }
 
     //private void OnCollisionExit(Collision collision)
