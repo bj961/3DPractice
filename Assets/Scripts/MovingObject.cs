@@ -31,30 +31,30 @@ public class MovingObject : MonoBehaviour
 
     void FixedUpdate()
     {
-        //_rigidbody.MovePosition(Vector3.MoveTowards(_rigidbody.position, targetPosition, moveSpeed * Time.deltaTime));
+        _rigidbody.MovePosition(Vector3.MoveTowards(_rigidbody.position, targetPosition, moveSpeed * Time.deltaTime));
 
-        //if(Vector3.Distance(_rigidbody.position, targetPosition) < 0.01f)
-        //{
-        //    directionSwap = !directionSwap;
-        //    targetPosition = directionSwap ? movePoint[0] : movePoint[1];
-        //}
-
-        if (Vector3.Distance(platform.position, targetPosition) < 0.1f)
+        if (Vector3.Distance(_rigidbody.position, targetPosition) < 0.01f)
         {
             directionSwap = !directionSwap;
             targetPosition = directionSwap ? movePoint[0] : movePoint[1];
         }
-        Movement(platform);
+
+        //if (Vector3.Distance(platform.position, targetPosition) < 0.1f)
+        //{
+        //    directionSwap = !directionSwap;
+        //    targetPosition = directionSwap ? movePoint[0] : movePoint[1];
+        //}
+        //Movement(platform);
     }
 
-    void Movement(Transform targetTransform)
-    {
-        targetTransform.position = targetTransform.position + targetPosition.normalized * moveSpeed * Time.deltaTime;
-        //targetTransform.position = Vector3.MoveTowards(targetTransform.position, targetPosition, moveSpeed * Time.deltaTime);
-    }
+    //void Movement(Transform targetTransform)
+    //{
+    //    targetTransform.position = targetTransform.position + targetPosition.normalized * moveSpeed * Time.deltaTime;
+    //    //targetTransform.position = Vector3.MoveTowards(targetTransform.position, targetPosition, moveSpeed * Time.deltaTime);
+    //}
 
-    private void OnCollisionStay(Collision collision)
-    {
-        Movement(collision.gameObject.transform);
-    }
+    //private void OnCollisionStay(Collision collision)
+    //{
+    //    Movement(collision.gameObject.transform);
+    //}
 }
